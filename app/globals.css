@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: white;
+}
+
+input[type="range"] {
+  height: 4px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
+}
