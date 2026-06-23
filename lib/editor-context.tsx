@@ -9,6 +9,7 @@ interface EditorContextValue extends EditorState {
   loadImage: (file: File) => Promise<void>;
   clearImage: () => void;
   uploadError: string | null;
+  applyResize: (width: number, height: number) => Promise<void>;
 }
 
 const EditorContext = createContext<EditorContextValue | null>(null);
@@ -65,6 +66,73 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     setUploadError(null);
   }, [image]);
 
+  // ── Resize ────────────────────────────────────────────────
+  const applyResize = useCallback(
+    async (newWidth: number, newHeight: number) => {
+      if (!image) return;
+
+      setIsProcessing(true);
+
+      try {
+        // Draw the current image onto a canvas at the new dimensions
+        const canvas = document.createElement("canvas");
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Canvas context unavailable");
+
+        // Load the current image into an HTMLImageElement
+        const img = new Image();
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = reject;
+          img.src = image.url;
+        });
+
+        // Use high-quality downscaling
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+        // Convert canvas → Blob → ObjectURL
+        const mimeType = image.type === "image/png" ? "image/png" : "image/jpeg";
+        const quality = mimeType === "image/jpeg" ? 0.95 : undefined;
+
+        const blob = await new Promise<Blob>((resolve, reject) => {
+          canvas.toBlob(
+            (b) => (b ? resolve(b) : reject(new Error("toBlob failed"))),
+            mimeType,
+            quality
+          );
+        });
+
+        // Build the extension from mime
+        const ext = mimeType === "image/png" ? "png" : "jpg";
+        const baseName = image.name.replace(/\.[^/.]+$/, "");
+
+        // Revoke the old URL before replacing
+        URL.revokeObjectURL(image.url);
+        const newUrl = URL.createObjectURL(blob);
+
+        setImage({
+          file: new File([blob], `${baseName}-${newWidth}x${newHeight}.${ext}`, { type: mimeType }),
+          url: newUrl,
+          name: `${baseName}-${newWidth}x${newHeight}.${ext}`,
+          size: blob.size,
+          width: newWidth,
+          height: newHeight,
+          type: mimeType,
+        });
+      } catch (err) {
+        console.error("Resize failed:", err);
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [image]
+  );
+
   return (
     <EditorContext.Provider
       value={{
@@ -75,6 +143,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         setActiveTool,
         loadImage,
         clearImage,
+        applyResize,
       }}
     >
       {children}

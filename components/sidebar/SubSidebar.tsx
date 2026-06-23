@@ -2,7 +2,7 @@
 
 import { useEditor } from "@/lib/editor-context";
 import { TOOLS } from "@/lib/tools";
-import ResizePanel from "@/components/tools/ResizePanel";
+import ResizePanel, { getResizeValues } from "@/components/tools/ResizePanel";
 import CompressPanel from "@/components/tools/CompressPanel";
 import CropPanel from "@/components/tools/CropPanel";
 import RotatePanel from "@/components/tools/RotatePanel";
@@ -23,12 +23,20 @@ const PANELS: Record<string, React.ReactNode> = {
 };
 
 export default function SubSidebar() {
-  const { activeTool } = useEditor();
+  const { activeTool, isProcessing, applyResize } = useEditor();
 
   if (!activeTool) return null;
 
   const tool = TOOLS.find((t) => t.id === activeTool);
   const panel = PANELS[activeTool];
+
+  const handleApply = async () => {
+    if (activeTool === "resize") {
+      const { width, height } = getResizeValues();
+      await applyResize(width, height);
+    }
+    // Other tools will be wired here in future branches
+  };
 
   return (
     <aside className="w-[220px] shrink-0 border-r border-stone-200 bg-white flex flex-col">
@@ -45,8 +53,19 @@ export default function SubSidebar() {
 
       {/* Apply button */}
       <div className="p-4 border-t border-stone-100">
-        <button className="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors shadow-sm shadow-indigo-200">
-          Apply {tool?.label}
+        <button
+          onClick={handleApply}
+          disabled={isProcessing}
+          className="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold py-2.5 rounded-xl transition-colors shadow-sm shadow-indigo-200 flex items-center justify-center gap-2"
+        >
+          {isProcessing ? (
+            <>
+              <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              Processing…
+            </>
+          ) : (
+            `Apply ${tool?.label}`
+          )}
         </button>
       </div>
     </aside>
