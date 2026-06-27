@@ -31,6 +31,10 @@
 
 ![Compress](public/screenshots/compress.png)
 
+### Crop Tool
+
+![Crop](public/screenshots/crop.png)
+
 </div>
 
 ---

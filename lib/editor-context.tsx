@@ -11,6 +11,7 @@ interface EditorContextValue extends EditorState {
   uploadError: string | null;
   applyResize: (width: number, height: number) => Promise<void>;
   applyCompress: (quality: number) => Promise<void>;
+  applyCrop: (x: number, y: number, width: number, height: number) => Promise<void>;
 }
 
 const EditorContext = createContext<EditorContextValue | null>(null);
@@ -190,6 +191,61 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     [image]
   );
 
+  // ── Crop ──────────────────────────────────────────────────────
+  const applyCrop = useCallback(
+    async (x: number, y: number, width: number, height: number) => {
+      if (!image) return;
+
+      setIsProcessing(true);
+
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Canvas context unavailable");
+
+        const img = new Image();
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = reject;
+          img.src = image.url;
+        });
+
+        ctx.drawImage(img, -x, -y, image.width, image.height);
+
+        const mimeType = image.type;
+        const ext = mimeType === "image/jpeg" ? "jpg" : mimeType.split("/")[1];
+        const blob = await new Promise<Blob>((resolve, reject) => {
+          canvas.toBlob(
+            (b) => (b ? resolve(b) : reject(new Error("toBlob failed"))),
+            mimeType
+          );
+        });
+
+        const baseName = image.name.replace(/\.[^/.]+$/, "");
+        URL.revokeObjectURL(image.url);
+        const newUrl = URL.createObjectURL(blob);
+
+        setImage({
+          file: new File([blob], `${baseName}-cropped.${ext}`, { type: mimeType }),
+          url: newUrl,
+          name: `${baseName}-cropped.${ext}`,
+          size: blob.size,
+          width,
+          height,
+          type: mimeType,
+        });
+      } catch (err) {
+        console.error("Crop failed:", err);
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [image]
+  );
+
   return (
     <EditorContext.Provider
       value={{
@@ -202,6 +258,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         clearImage,
         applyResize,
         applyCompress,
+        applyCrop,
       }}
     >
       {children}
