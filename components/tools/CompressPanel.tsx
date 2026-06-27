@@ -1,9 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+export let getCompressValues: () => { quality: number } = () => ({ quality: 80 });
 
 export default function CompressPanel() {
   const [quality, setQuality] = useState(80);
+
+  useEffect(() => {
+    getCompressValues = () => ({ quality });
+  }, [quality]);
 
   const label =
     quality >= 85 ? "High quality" : quality >= 60 ? "Balanced" : "Smaller file";
@@ -35,8 +41,8 @@ export default function CompressPanel() {
           {quality >= 85
             ? "Best for printing or archiving"
             : quality >= 60
-            ? "Good balance for web use"
-            : "Optimized for fast loading"}
+              ? "Good balance for web use"
+              : "Optimized for fast loading"}
         </p>
       </div>
     </div>

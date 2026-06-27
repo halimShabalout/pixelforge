@@ -13,7 +13,23 @@
 
 [Live Demo](#) · [Report Bug](https://github.com/halimShabalout/pixelforge/issues) · [Request Feature](https://github.com/halimShabalout/pixelforge/issues)
 
-![PixelForge Screenshot](public/screenshot.png)
+## Screenshots
+
+### Home
+
+![Home](public/screenshots/home.png)
+
+### Editor
+
+![Editor](public/screenshots/editor.png)
+
+### Resize Tool
+
+![Resize](public/screenshots/resize.png)
+
+### Compress Tool
+
+![Compress](public/screenshots/compress.png)
 
 </div>
 
@@ -130,8 +146,8 @@ pixelforge/
 - [x] Project structure & UI layout
 - [x] Image upload (click + drag & drop)
 - [x] Responsive layout with mobile sidebar drawer
-- [ ] Resize implementation (Canvas API)
-- [ ] Compress implementation
+- [x] Resize implementation (Canvas API)
+- [x] Compress implementation
 - [ ] Crop with interactive selection
 - [ ] Rotate & flip
 - [ ] Format conversion
