@@ -10,6 +10,7 @@ interface EditorContextValue extends EditorState {
   clearImage: () => void;
   uploadError: string | null;
   applyResize: (width: number, height: number) => Promise<void>;
+  applyCompress: (quality: number) => Promise<void>;
 }
 
 const EditorContext = createContext<EditorContextValue | null>(null);
@@ -133,6 +134,62 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     [image]
   );
 
+  // ── Compress ────────────────────────────────────────────────
+  const applyCompress = useCallback(
+    async (quality: number) => {
+      if (!image) return;
+
+      setIsProcessing(true);
+
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = image.width;
+        canvas.height = image.height;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Canvas context unavailable");
+
+        const img = new Image();
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = reject;
+          img.src = image.url;
+        });
+
+        ctx.drawImage(img, 0, 0);
+
+        // JPEG only — PNG doesn't support lossy compression
+        const mimeType = "image/jpeg";
+        const blob = await new Promise<Blob>((resolve, reject) => {
+          canvas.toBlob(
+            (b) => (b ? resolve(b) : reject(new Error("toBlob failed"))),
+            mimeType,
+            quality / 100  // toBlob expects 0.0 → 1.0
+          );
+        });
+
+        const baseName = image.name.replace(/\.[^/.]+$/, "");
+        URL.revokeObjectURL(image.url);
+        const newUrl = URL.createObjectURL(blob);
+
+        setImage({
+          file: new File([blob], `${baseName}-compressed.jpg`, { type: mimeType }),
+          url: newUrl,
+          name: `${baseName}-compressed.jpg`,
+          size: blob.size,
+          width: image.width,
+          height: image.height,
+          type: mimeType,
+        });
+      } catch (err) {
+        console.error("Compress failed:", err);
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [image]
+  );
+
   return (
     <EditorContext.Provider
       value={{
@@ -144,6 +201,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         loadImage,
         clearImage,
         applyResize,
+        applyCompress,
       }}
     >
       {children}
