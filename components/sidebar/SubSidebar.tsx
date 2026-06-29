@@ -4,8 +4,8 @@ import { useEditor } from "@/lib/editor-context";
 import { TOOLS } from "@/lib/tools";
 import ResizePanel, { getResizeValues } from "@/components/tools/ResizePanel";
 import CompressPanel, { getCompressValues } from "@/components/tools/CompressPanel";
-import CropPanel, {getCropValues} from "@/components/tools/CropPanel";
-import RotatePanel from "@/components/tools/RotatePanel";
+import CropPanel, { getCropValues } from "@/components/tools/CropPanel";
+import RotatePanel, { getRotateValues } from "@/components/tools/RotatePanel";
 import FlipPanel from "@/components/tools/FlipPanel";
 import ConvertPanel from "@/components/tools/ConvertPanel";
 import BrightnessPanel from "@/components/tools/BrightnessPanel";
@@ -23,7 +23,7 @@ const PANELS: Record<string, React.ReactNode> = {
 };
 
 export default function SubSidebar() {
-  const { activeTool, isProcessing, applyResize, applyCompress, applyCrop } = useEditor();
+  const { activeTool, isProcessing, applyResize, applyCompress, applyCrop, applyRotate } = useEditor();
 
   if (!activeTool) return null;
 
@@ -45,6 +45,11 @@ export default function SubSidebar() {
       case "crop": {
         const { x, y, width, height } = getCropValues();
         await applyCrop(x, y, width, height);
+        break;
+      }
+      case "rotate": {
+        const { angle } = getRotateValues();
+        await applyRotate(angle);
         break;
       }
       // future tools here
