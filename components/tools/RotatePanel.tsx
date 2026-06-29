@@ -1,11 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const QUICK = [90, 180, 270];
 
+export let getRotateValues: () => { angle: number } = () => ({ angle: 0 });
+
 export default function RotatePanel() {
   const [angle, setAngle] = useState(0);
+
+  useEffect(() => {
+    getRotateValues = () => ({ angle });
+  }, [angle]);
 
   return (
     <div className="space-y-5">

@@ -12,6 +12,7 @@ interface EditorContextValue extends EditorState {
   applyResize: (width: number, height: number) => Promise<void>;
   applyCompress: (quality: number) => Promise<void>;
   applyCrop: (x: number, y: number, width: number, height: number) => Promise<void>;
+  applyRotate: (angle: number) => Promise<void>;
 }
 
 const EditorContext = createContext<EditorContextValue | null>(null);
@@ -246,6 +247,70 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     [image]
   );
 
+  // ── Rotate ──────────────────────────────────────────────────────
+  const applyRotate = useCallback(
+    async (angle: number) => {
+      if (!image) return;
+
+      setIsProcessing(true);
+
+      try {
+        const rad = (angle * Math.PI) / 180;
+        const sin = Math.abs(Math.sin(rad));
+        const cos = Math.abs(Math.cos(rad));
+
+        const newWidth = Math.round(image.width * cos + image.height * sin);
+        const newHeight = Math.round(image.width * sin + image.height * cos);
+
+        const canvas = document.createElement("canvas");
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Canvas context unavailable");
+
+        const img = new Image();
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = reject;
+          img.src = image.url;
+        });
+
+        ctx.translate(newWidth / 2, newHeight / 2);
+        ctx.rotate(rad);
+        ctx.drawImage(img, -image.width / 2, -image.height / 2);
+
+        const mimeType = image.type;
+        const ext = mimeType === "image/jpeg" ? "jpg" : mimeType.split("/")[1];
+        const blob = await new Promise<Blob>((resolve, reject) => {
+          canvas.toBlob(
+            (b) => (b ? resolve(b) : reject(new Error("toBlob failed"))),
+            mimeType
+          );
+        });
+
+        const baseName = image.name.replace(/\.[^/.]+$/, "");
+        URL.revokeObjectURL(image.url);
+        const newUrl = URL.createObjectURL(blob);
+
+        setImage({
+          file: new File([blob], `${baseName}-rotated.${ext}`, { type: mimeType }),
+          url: newUrl,
+          name: `${baseName}-rotated.${ext}`,
+          size: blob.size,
+          width: newWidth,
+          height: newHeight,
+          type: mimeType,
+        });
+      } catch (err) {
+        console.error("Rotate failed:", err);
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [image]
+  );
+
   return (
     <EditorContext.Provider
       value={{
@@ -259,6 +324,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         applyResize,
         applyCompress,
         applyCrop,
+        applyRotate,
       }}
     >
       {children}

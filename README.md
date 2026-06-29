@@ -35,6 +35,9 @@
 
 ![Crop](public/screenshots/crop.png)
 
+### Rotate Tool
+
+![Rotate](public/screenshots/rotate.png)
 </div>
 
 ---
@@ -152,8 +155,8 @@ pixelforge/
 - [x] Responsive layout with mobile sidebar drawer
 - [x] Resize implementation (Canvas API)
 - [x] Compress implementation
-- [ ] Crop with interactive selection
-- [ ] Rotate & flip
+- [x] Crop with interactive selection
+- [x] Rotate & flip
 - [ ] Format conversion
 - [ ] Brightness / contrast / saturation filters
 - [ ] Grayscale conversion
