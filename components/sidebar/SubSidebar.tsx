@@ -6,7 +6,7 @@ import ResizePanel, { getResizeValues } from "@/components/tools/ResizePanel";
 import CompressPanel, { getCompressValues } from "@/components/tools/CompressPanel";
 import CropPanel, { getCropValues } from "@/components/tools/CropPanel";
 import RotatePanel, { getRotateValues } from "@/components/tools/RotatePanel";
-import FlipPanel from "@/components/tools/FlipPanel";
+import FlipPanel, { getFlipValues } from "@/components/tools/FlipPanel";
 import ConvertPanel from "@/components/tools/ConvertPanel";
 import BrightnessPanel from "@/components/tools/BrightnessPanel";
 import GrayscalePanel from "@/components/tools/GrayscalePanel";
@@ -23,7 +23,7 @@ const PANELS: Record<string, React.ReactNode> = {
 };
 
 export default function SubSidebar() {
-  const { activeTool, isProcessing, applyResize, applyCompress, applyCrop, applyRotate } = useEditor();
+  const { activeTool, isProcessing, applyResize, applyCompress, applyCrop, applyRotate, applyFlip } = useEditor();
 
   if (!activeTool) return null;
 
@@ -50,6 +50,11 @@ export default function SubSidebar() {
       case "rotate": {
         const { angle } = getRotateValues();
         await applyRotate(angle);
+        break;
+      }
+      case "flip": {
+        const { horizontal, vertical } = getFlipValues();
+        await applyFlip(horizontal, vertical);
         break;
       }
       // future tools here

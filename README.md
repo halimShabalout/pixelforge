@@ -38,6 +38,10 @@
 ### Rotate Tool
 
 ![Rotate](public/screenshots/rotate.png)
+
+### Flip Tool
+
+![Flip](public/screenshots/flip.png)
 </div>
 
 ---
