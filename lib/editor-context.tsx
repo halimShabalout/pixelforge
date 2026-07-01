@@ -13,6 +13,7 @@ interface EditorContextValue extends EditorState {
   applyCompress: (quality: number) => Promise<void>;
   applyCrop: (x: number, y: number, width: number, height: number) => Promise<void>;
   applyRotate: (angle: number) => Promise<void>;
+  applyFlip: (horizontal: boolean, vertical: boolean) => Promise<void>;
 }
 
 const EditorContext = createContext<EditorContextValue | null>(null);
@@ -311,6 +312,69 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     [image]
   );
 
+  // ── Flip ──────────────────────────────────────────────────────
+  const applyFlip = useCallback(
+    async (horizontal: boolean, vertical: boolean) => {
+      if (!image) return;
+
+      setIsProcessing(true);
+
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = image.width;
+        canvas.height = image.height;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Canvas context unavailable");
+
+        const img = new Image();
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = reject;
+          img.src = image.url;
+        });
+
+        ctx.translate(
+          horizontal ? image.width : 0,
+          vertical ? image.height : 0
+        );
+        ctx.scale(
+          horizontal ? -1 : 1,
+          vertical ? -1 : 1
+        );
+        ctx.drawImage(img, 0, 0);
+
+        const mimeType = image.type;
+        const ext = mimeType === "image/jpeg" ? "jpg" : mimeType.split("/")[1];
+        const blob = await new Promise<Blob>((resolve, reject) => {
+          canvas.toBlob(
+            (b) => (b ? resolve(b) : reject(new Error("toBlob failed"))),
+            mimeType
+          );
+        });
+
+        const baseName = image.name.replace(/\.[^/.]+$/, "");
+        URL.revokeObjectURL(image.url);
+        const newUrl = URL.createObjectURL(blob);
+
+        setImage({
+          file: new File([blob], `${baseName}-flipped.${ext}`, { type: mimeType }),
+          url: newUrl,
+          name: `${baseName}-flipped.${ext}`,
+          size: blob.size,
+          width: image.width,
+          height: image.height,
+          type: mimeType,
+        });
+      } catch (err) {
+        console.error("Flip failed:", err);
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [image]
+  );
+
   return (
     <EditorContext.Provider
       value={{
@@ -325,6 +389,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         applyCompress,
         applyCrop,
         applyRotate,
+        applyFlip,
       }}
     >
       {children}

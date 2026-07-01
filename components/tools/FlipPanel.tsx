@@ -1,10 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+export let getFlipValues: () => { horizontal: boolean; vertical: boolean } = () => ({
+  horizontal: false,
+  vertical: false,
+});
 
 export default function FlipPanel() {
   const [h, setH] = useState(false);
   const [v, setV] = useState(false);
+
+  useEffect(() => {
+    getFlipValues = () => ({ horizontal: h, vertical: v });
+  }, [h, v]);
 
   const Toggle = ({
     label,
@@ -19,11 +28,10 @@ export default function FlipPanel() {
   }) => (
     <button
       onClick={onChange}
-      className={`flex-1 flex flex-col items-center gap-2 py-4 rounded-xl border-2 transition-all ${
-        value
+      className={`flex-1 flex flex-col items-center gap-2 py-4 rounded-xl border-2 transition-all ${value
           ? "border-indigo-400 bg-indigo-50 text-indigo-700"
           : "border-stone-200 text-stone-400 hover:border-stone-300"
-      }`}
+        }`}
     >
       <span className="text-2xl">{icon}</span>
       <span className="text-xs font-medium">{label}</span>
