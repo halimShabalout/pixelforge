@@ -11,9 +11,15 @@ interface EditorContextValue extends EditorState {
   uploadError: string | null;
   applyResize: (width: number, height: number) => Promise<void>;
   applyCompress: (quality: number) => Promise<void>;
-  applyCrop: (x: number, y: number, width: number, height: number) => Promise<void>;
+  applyCrop: (
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+  ) => Promise<void>;
   applyRotate: (angle: number) => Promise<void>;
   applyFlip: (horizontal: boolean, vertical: boolean) => Promise<void>;
+  applyConvert: (format: "jpeg" | "png" | "webp" | "gif") => Promise<void>;
 }
 
 const EditorContext = createContext<EditorContextValue | null>(null);
@@ -28,7 +34,9 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     setUploadError(null);
 
     if (!ACCEPTED_FORMATS.includes(file.type)) {
-      setUploadError("Unsupported format. Please upload a JPEG, PNG, WebP, GIF, or BMP image.");
+      setUploadError(
+        "Unsupported format. Please upload a JPEG, PNG, WebP, GIF, or BMP image.",
+      );
       return;
     }
 
@@ -100,14 +108,15 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         ctx.drawImage(img, 0, 0, newWidth, newHeight);
 
         // Convert canvas → Blob → ObjectURL
-        const mimeType = image.type === "image/png" ? "image/png" : "image/jpeg";
+        const mimeType =
+          image.type === "image/png" ? "image/png" : "image/jpeg";
         const quality = mimeType === "image/jpeg" ? 0.95 : undefined;
 
         const blob = await new Promise<Blob>((resolve, reject) => {
           canvas.toBlob(
             (b) => (b ? resolve(b) : reject(new Error("toBlob failed"))),
             mimeType,
-            quality
+            quality,
           );
         });
 
@@ -120,7 +129,11 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         const newUrl = URL.createObjectURL(blob);
 
         setImage({
-          file: new File([blob], `${baseName}-${newWidth}x${newHeight}.${ext}`, { type: mimeType }),
+          file: new File(
+            [blob],
+            `${baseName}-${newWidth}x${newHeight}.${ext}`,
+            { type: mimeType },
+          ),
           url: newUrl,
           name: `${baseName}-${newWidth}x${newHeight}.${ext}`,
           size: blob.size,
@@ -134,7 +147,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         setIsProcessing(false);
       }
     },
-    [image]
+    [image],
   );
 
   // ── Compress ────────────────────────────────────────────────
@@ -167,7 +180,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
           canvas.toBlob(
             (b) => (b ? resolve(b) : reject(new Error("toBlob failed"))),
             mimeType,
-            quality / 100  // toBlob expects 0.0 → 1.0
+            quality / 100, // toBlob expects 0.0 → 1.0
           );
         });
 
@@ -176,7 +189,9 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         const newUrl = URL.createObjectURL(blob);
 
         setImage({
-          file: new File([blob], `${baseName}-compressed.jpg`, { type: mimeType }),
+          file: new File([blob], `${baseName}-compressed.jpg`, {
+            type: mimeType,
+          }),
           url: newUrl,
           name: `${baseName}-compressed.jpg`,
           size: blob.size,
@@ -190,7 +205,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         setIsProcessing(false);
       }
     },
-    [image]
+    [image],
   );
 
   // ── Crop ──────────────────────────────────────────────────────
@@ -222,7 +237,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         const blob = await new Promise<Blob>((resolve, reject) => {
           canvas.toBlob(
             (b) => (b ? resolve(b) : reject(new Error("toBlob failed"))),
-            mimeType
+            mimeType,
           );
         });
 
@@ -231,7 +246,9 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         const newUrl = URL.createObjectURL(blob);
 
         setImage({
-          file: new File([blob], `${baseName}-cropped.${ext}`, { type: mimeType }),
+          file: new File([blob], `${baseName}-cropped.${ext}`, {
+            type: mimeType,
+          }),
           url: newUrl,
           name: `${baseName}-cropped.${ext}`,
           size: blob.size,
@@ -245,7 +262,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         setIsProcessing(false);
       }
     },
-    [image]
+    [image],
   );
 
   // ── Rotate ──────────────────────────────────────────────────────
@@ -286,7 +303,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         const blob = await new Promise<Blob>((resolve, reject) => {
           canvas.toBlob(
             (b) => (b ? resolve(b) : reject(new Error("toBlob failed"))),
-            mimeType
+            mimeType,
           );
         });
 
@@ -295,7 +312,9 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         const newUrl = URL.createObjectURL(blob);
 
         setImage({
-          file: new File([blob], `${baseName}-rotated.${ext}`, { type: mimeType }),
+          file: new File([blob], `${baseName}-rotated.${ext}`, {
+            type: mimeType,
+          }),
           url: newUrl,
           name: `${baseName}-rotated.${ext}`,
           size: blob.size,
@@ -309,7 +328,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         setIsProcessing(false);
       }
     },
-    [image]
+    [image],
   );
 
   // ── Flip ──────────────────────────────────────────────────────
@@ -336,12 +355,9 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
 
         ctx.translate(
           horizontal ? image.width : 0,
-          vertical ? image.height : 0
+          vertical ? image.height : 0,
         );
-        ctx.scale(
-          horizontal ? -1 : 1,
-          vertical ? -1 : 1
-        );
+        ctx.scale(horizontal ? -1 : 1, vertical ? -1 : 1);
         ctx.drawImage(img, 0, 0);
 
         const mimeType = image.type;
@@ -349,7 +365,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         const blob = await new Promise<Blob>((resolve, reject) => {
           canvas.toBlob(
             (b) => (b ? resolve(b) : reject(new Error("toBlob failed"))),
-            mimeType
+            mimeType,
           );
         });
 
@@ -358,7 +374,9 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         const newUrl = URL.createObjectURL(blob);
 
         setImage({
-          file: new File([blob], `${baseName}-flipped.${ext}`, { type: mimeType }),
+          file: new File([blob], `${baseName}-flipped.${ext}`, {
+            type: mimeType,
+          }),
           url: newUrl,
           name: `${baseName}-flipped.${ext}`,
           size: blob.size,
@@ -372,7 +390,62 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         setIsProcessing(false);
       }
     },
-    [image]
+    [image],
+  );
+
+  // ── Convert ──────────────────────────────────────────────────────
+  const applyConvert = useCallback(
+    async (format: "jpeg" | "png" | "webp" | "gif") => {
+      if (!image) return;
+
+      setIsProcessing(true);
+
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = image.width;
+        canvas.height = image.height;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Canvas context unavailable");
+
+        const img = new Image();
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = reject;
+          img.src = image.url;
+        });
+
+        ctx.drawImage(img, 0, 0);
+
+        const mimeType = `image/${format}`;
+        const ext = format === "jpeg" ? "jpg" : format;
+        const blob = await new Promise<Blob>((resolve, reject) => {
+          canvas.toBlob(
+            (b) => (b ? resolve(b) : reject(new Error("toBlob failed"))),
+            mimeType,
+          );
+        });
+
+        const baseName = image.name.replace(/\.[^/.]+$/, "");
+        URL.revokeObjectURL(image.url);
+        const newUrl = URL.createObjectURL(blob);
+
+        setImage({
+          file: new File([blob], `${baseName}.${ext}`, { type: mimeType }),
+          url: newUrl,
+          name: `${baseName}.${ext}`,
+          size: blob.size,
+          width: image.width,
+          height: image.height,
+          type: mimeType,
+        });
+      } catch (err) {
+        console.error("Convert failed:", err);
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [image],
   );
 
   return (
@@ -390,6 +463,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         applyCrop,
         applyRotate,
         applyFlip,
+        applyConvert,
       }}
     >
       {children}
