@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const FORMATS = [
   { id: "jpeg", label: "JPEG", desc: "Best for photos" },
@@ -9,8 +9,18 @@ const FORMATS = [
   { id: "gif", label: "GIF", desc: "Animated images" },
 ] as const;
 
+export let getConvertValues: () => {
+  format: "jpeg" | "png" | "webp" | "gif";
+} = () => ({
+  format: "webp",
+});
+
 export default function ConvertPanel() {
   const [format, setFormat] = useState<"jpeg" | "png" | "webp" | "gif">("webp");
+
+  useEffect(() => {
+    getConvertValues = () => ({ format });
+  }, [format]);
 
   return (
     <div className="space-y-4">
