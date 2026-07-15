@@ -11,7 +11,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38bdf8?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
-[Live Demo](#) · [Report Bug](https://github.com/halimShabalout/pixelforge/issues) · [Request Feature](https://github.com/halimShabalout/pixelforge/issues)
+[Live Demo](https://pixelforge-eta-gray.vercel.app) · [Report Bug](https://github.com/halimShabalout/pixelforge/issues) · [Request Feature](https://github.com/halimShabalout/pixelforge/issues)
 
 ## Screenshots
 
@@ -42,6 +42,23 @@
 ### Flip Tool
 
 ![Flip](public/screenshots/flip.png)
+
+### Convert Tool
+
+![Convert](public/screenshots/convert.png)
+
+### Brightness Tool
+
+![Brightness](public/screenshots/brightness.png)
+
+### Contrast Tool
+
+![Contrast](public/screenshots/contrast.png)
+
+### Saturation Tool
+
+![Saturation](public/screenshots/saturation.png)
+
 </div>
 
 ---
@@ -161,8 +178,8 @@ pixelforge/
 - [x] Compress implementation
 - [x] Crop with interactive selection
 - [x] Rotate & flip
-- [ ] Format conversion
-- [ ] Brightness / contrast / saturation filters
+- [x] Format conversion
+- [x] Brightness / contrast / saturation filters
 - [ ] Grayscale conversion
 - [ ] Undo / redo history
 - [ ] Backend support for heavy processing

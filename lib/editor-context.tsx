@@ -20,6 +20,11 @@ interface EditorContextValue extends EditorState {
   applyRotate: (angle: number) => Promise<void>;
   applyFlip: (horizontal: boolean, vertical: boolean) => Promise<void>;
   applyConvert: (format: "jpeg" | "png" | "webp" | "gif") => Promise<void>;
+  applyAdjust: (
+    brightness: number,
+    contrast: number,
+    saturation: number,
+  ) => Promise<void>;
 }
 
 const EditorContext = createContext<EditorContextValue | null>(null);
@@ -448,6 +453,98 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     [image],
   );
 
+  // ── Brightness ──────────────────────────────────────────────────────
+  const applyAdjust = useCallback(
+    async (brightness: number, contrast: number, saturation: number) => {
+      if (!image) return;
+
+      setIsProcessing(true);
+
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = image.width;
+        canvas.height = image.height;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Canvas context unavailable");
+
+        const img = new Image();
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = reject;
+          img.src = image.url;
+        });
+
+        ctx.drawImage(img, 0, 0);
+
+        const imageData = ctx.getImageData(0, 0, image.width, image.height);
+        const data = imageData.data;
+
+        for (let i = 0; i < data.length; i += 4) {
+          let r = data[i];
+          let g = data[i + 1];
+          let b = data[i + 2];
+
+          // Brightness:    
+          const b_factor = (brightness / 100) * 255;
+          r += b_factor;
+          g += b_factor;
+          b += b_factor;
+
+          // Contrast:
+          const c_factor = (contrast / 100) * 127;
+          r = (r - 128) * ((128 + c_factor) / 128) + 128;
+          g = (g - 128) * ((128 + c_factor) / 128) + 128;
+          b = (b - 128) * ((128 + c_factor) / 128) + 128;
+
+          // Saturation:   
+          const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+          const s_factor = 1 + saturation / 100;
+          r = gray + (r - gray) * s_factor;
+          g = gray + (g - gray) * s_factor;
+          b = gray + (b - gray) * s_factor;
+
+          // Uint8ClampedArray  
+          data[i] = r;
+          data[i + 1] = g;
+          data[i + 2] = b;
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+
+        const mimeType = image.type;
+        const ext = mimeType === "image/jpeg" ? "jpg" : mimeType.split("/")[1];
+        const blob = await new Promise<Blob>((resolve, reject) => {
+          canvas.toBlob(
+            (b) => (b ? resolve(b) : reject(new Error("toBlob failed"))),
+            mimeType,
+          );
+        });
+
+        const baseName = image.name.replace(/\.[^/.]+$/, "");
+        URL.revokeObjectURL(image.url);
+        const newUrl = URL.createObjectURL(blob);
+
+        setImage({
+          file: new File([blob], `${baseName}-adjusted.${ext}`, {
+            type: mimeType,
+          }),
+          url: newUrl,
+          name: `${baseName}-adjusted.${ext}`,
+          size: blob.size,
+          width: image.width,
+          height: image.height,
+          type: mimeType,
+        });
+      } catch (err) {
+        console.error("Adjust failed:", err);
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [image],
+  );
+
   return (
     <EditorContext.Provider
       value={{
@@ -464,6 +561,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         applyRotate,
         applyFlip,
         applyConvert,
+        applyAdjust,
       }}
     >
       {children}
