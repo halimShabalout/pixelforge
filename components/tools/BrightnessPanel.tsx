@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Slider {
   label: string;
@@ -40,10 +40,21 @@ function SliderRow({ label, value, setValue, min, max, defaultVal }: Slider) {
   );
 }
 
+export let getAdjustValues: () => {
+  brightness: number;
+  contrast: number;
+  saturation: number;
+} = () => ({ brightness: 0, contrast: 0, saturation: 0 });
+
+
 export default function BrightnessPanel() {
   const [brightness, setBrightness] = useState(0);
   const [contrast, setContrast] = useState(0);
   const [saturation, setSaturation] = useState(0);
+  
+  useEffect(() => {
+    getAdjustValues = () => ({ brightness, contrast, saturation });
+  }, [brightness, contrast, saturation]);
 
   const sliders: Slider[] = [
     { label: "Brightness", value: brightness, setValue: setBrightness, min: -100, max: 100, defaultVal: 0 },

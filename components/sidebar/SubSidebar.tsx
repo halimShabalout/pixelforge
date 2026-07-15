@@ -3,12 +3,18 @@
 import { useEditor } from "@/lib/editor-context";
 import { TOOLS } from "@/lib/tools";
 import ResizePanel, { getResizeValues } from "@/components/tools/ResizePanel";
-import CompressPanel, { getCompressValues } from "@/components/tools/CompressPanel";
+import CompressPanel, {
+  getCompressValues,
+} from "@/components/tools/CompressPanel";
 import CropPanel, { getCropValues } from "@/components/tools/CropPanel";
 import RotatePanel, { getRotateValues } from "@/components/tools/RotatePanel";
 import FlipPanel, { getFlipValues } from "@/components/tools/FlipPanel";
-import ConvertPanel, { getConvertValues} from "@/components/tools/ConvertPanel";
-import BrightnessPanel from "@/components/tools/BrightnessPanel";
+import ConvertPanel, {
+  getConvertValues,
+} from "@/components/tools/ConvertPanel";
+import BrightnessPanel, {
+  getAdjustValues,
+} from "@/components/tools/BrightnessPanel";
 import GrayscalePanel from "@/components/tools/GrayscalePanel";
 
 const PANELS: Record<string, React.ReactNode> = {
@@ -32,6 +38,7 @@ export default function SubSidebar() {
     applyRotate,
     applyFlip,
     applyConvert,
+    applyAdjust,
   } = useEditor();
 
   if (!activeTool) return null;
@@ -69,6 +76,11 @@ export default function SubSidebar() {
       case "convert": {
         const { format } = getConvertValues();
         await applyConvert(format);
+        break;
+      }
+      case "brightness": {
+        const { brightness, contrast, saturation } = getAdjustValues();
+        await applyAdjust(brightness, contrast, saturation);
         break;
       }
       // future tools here
