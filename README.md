@@ -27,38 +27,6 @@
 
 ![Resize](public/screenshots/resize.png)
 
-### Compress Tool
-
-![Compress](public/screenshots/compress.png)
-
-### Crop Tool
-
-![Crop](public/screenshots/crop.png)
-
-### Rotate Tool
-
-![Rotate](public/screenshots/rotate.png)
-
-### Flip Tool
-
-![Flip](public/screenshots/flip.png)
-
-### Convert Tool
-
-![Convert](public/screenshots/convert.png)
-
-### Brightness Tool
-
-![Brightness](public/screenshots/brightness.png)
-
-### Contrast Tool
-
-![Contrast](public/screenshots/contrast.png)
-
-### Saturation Tool
-
-![Saturation](public/screenshots/saturation.png)
-
 </div>
 
 ---
@@ -180,7 +148,7 @@ pixelforge/
 - [x] Rotate & flip
 - [x] Format conversion
 - [x] Brightness / contrast / saturation filters
-- [ ] Grayscale conversion
+- [x] Grayscale conversion
 - [ ] Undo / redo history
 - [ ] Backend support for heavy processing
 

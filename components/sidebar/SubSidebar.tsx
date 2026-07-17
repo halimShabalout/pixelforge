@@ -15,7 +15,9 @@ import ConvertPanel, {
 import BrightnessPanel, {
   getAdjustValues,
 } from "@/components/tools/BrightnessPanel";
-import GrayscalePanel from "@/components/tools/GrayscalePanel";
+import GrayscalePanel, {
+  getGrayscaleValues,
+} from "@/components/tools/GrayscalePanel";
 
 const PANELS: Record<string, React.ReactNode> = {
   resize: <ResizePanel />,
@@ -39,6 +41,7 @@ export default function SubSidebar() {
     applyFlip,
     applyConvert,
     applyAdjust,
+    applyGrayscale,
   } = useEditor();
 
   if (!activeTool) return null;
@@ -83,7 +86,11 @@ export default function SubSidebar() {
         await applyAdjust(brightness, contrast, saturation);
         break;
       }
-      // future tools here
+      case "grayscale": {
+        const { mode } = getGrayscaleValues();
+        await applyGrayscale(mode);
+        break;
+      }
     }
   };
 

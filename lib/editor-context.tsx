@@ -25,6 +25,7 @@ interface EditorContextValue extends EditorState {
     contrast: number,
     saturation: number,
   ) => Promise<void>;
+  applyGrayscale: (mode: string) => Promise<void>;
 }
 
 const EditorContext = createContext<EditorContextValue | null>(null);
@@ -485,7 +486,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
           let g = data[i + 1];
           let b = data[i + 2];
 
-          // Brightness:    
+          // Brightness:
           const b_factor = (brightness / 100) * 255;
           r += b_factor;
           g += b_factor;
@@ -497,14 +498,14 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
           g = (g - 128) * ((128 + c_factor) / 128) + 128;
           b = (b - 128) * ((128 + c_factor) / 128) + 128;
 
-          // Saturation:   
+          // Saturation:
           const gray = 0.299 * r + 0.587 * g + 0.114 * b;
           const s_factor = 1 + saturation / 100;
           r = gray + (r - gray) * s_factor;
           g = gray + (g - gray) * s_factor;
           b = gray + (b - gray) * s_factor;
 
-          // Uint8ClampedArray  
+          // Uint8ClampedArray
           data[i] = r;
           data[i + 1] = g;
           data[i + 2] = b;
@@ -545,6 +546,93 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     [image],
   );
 
+  // ── Grayscale ──────────────────────────────────────────────────────
+  const applyGrayscale = useCallback(
+    async (mode: string) => {
+      if (!image) return;
+
+      setIsProcessing(true);
+
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = image.width;
+        canvas.height = image.height;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Canvas context unavailable");
+
+        const img = new Image();
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = reject;
+          img.src = image.url;
+        });
+
+        ctx.drawImage(img, 0, 0);
+
+        const imageData = ctx.getImageData(0, 0, image.width, image.height);
+        const data = imageData.data;
+
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+
+          let gray: number;
+
+          switch (mode) {
+            case "luminosity":
+              gray = 0.299 * r + 0.587 * g + 0.114 * b;
+              break;
+            case "average":
+              gray = (r + g + b) / 3;
+              break;
+            case "desaturate":
+              gray = (Math.max(r, g, b) + Math.min(r, g, b)) / 2;
+              break;
+            default:
+              gray = 0.299 * r + 0.587 * g + 0.114 * b;
+          }
+
+          data[i] = gray;
+          data[i + 1] = gray;
+          data[i + 2] = gray;
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+
+        const mimeType = image.type;
+        const ext = mimeType === "image/jpeg" ? "jpg" : mimeType.split("/")[1];
+        const blob = await new Promise<Blob>((resolve, reject) => {
+          canvas.toBlob(
+            (b) => (b ? resolve(b) : reject(new Error("toBlob failed"))),
+            mimeType,
+          );
+        });
+
+        const baseName = image.name.replace(/\.[^/.]+$/, "");
+        URL.revokeObjectURL(image.url);
+        const newUrl = URL.createObjectURL(blob);
+
+        setImage({
+          file: new File([blob], `${baseName}-grayscale.${ext}`, {
+            type: mimeType,
+          }),
+          url: newUrl,
+          name: `${baseName}-grayscale.${ext}`,
+          size: blob.size,
+          width: image.width,
+          height: image.height,
+          type: mimeType,
+        });
+      } catch (err) {
+        console.error("Grayscale failed:", err);
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [image],
+  );
   return (
     <EditorContext.Provider
       value={{
@@ -562,6 +650,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         applyFlip,
         applyConvert,
         applyAdjust,
+        applyGrayscale
       }}
     >
       {children}
