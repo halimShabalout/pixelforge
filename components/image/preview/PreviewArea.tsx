@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useEditor } from "@/lib/editor-context";
+import { useEditor } from "@/lib/image/editor-context";
 
 export default function PreviewArea() {
   const { image, isProcessing, uploadError, loadImage } = useEditor();
@@ -35,7 +35,10 @@ export default function PreviewArea() {
           isDragging ? "bg-indigo-50" : "bg-stone-50"
         }`}
         onDrop={handleDrop}
-        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsDragging(true);
+        }}
         onDragLeave={() => setIsDragging(false)}
       >
         <input
@@ -49,10 +52,27 @@ export default function PreviewArea() {
           }}
         />
         <div className="text-center space-y-4 max-w-xs">
-          <div className={`w-16 h-16 rounded-2xl mx-auto flex items-center justify-center transition-colors ${isDragging ? "bg-indigo-100" : "bg-stone-100"}`}>
+          <div
+            className={`w-16 h-16 rounded-2xl mx-auto flex items-center justify-center transition-colors ${isDragging ? "bg-indigo-100" : "bg-stone-100"}`}
+          >
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-              <rect x="2" y="2" width="24" height="24" rx="4" stroke={isDragging ? "#6366f1" : "#94a3b8"} strokeWidth="1.5" strokeDasharray="4 2" />
-              <path d="M14 10v8M10 14l4-4 4 4" stroke={isDragging ? "#6366f1" : "#94a3b8"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <rect
+                x="2"
+                y="2"
+                width="24"
+                height="24"
+                rx="4"
+                stroke={isDragging ? "#6366f1" : "#94a3b8"}
+                strokeWidth="1.5"
+                strokeDasharray="4 2"
+              />
+              <path
+                d="M14 10v8M10 14l4-4 4 4"
+                stroke={isDragging ? "#6366f1" : "#94a3b8"}
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </div>
 
@@ -89,7 +109,8 @@ export default function PreviewArea() {
       <div
         className="absolute inset-0 opacity-[0.04]"
         style={{
-          backgroundImage: "repeating-conic-gradient(#000 0% 25%, transparent 0% 50%)",
+          backgroundImage:
+            "repeating-conic-gradient(#000 0% 25%, transparent 0% 50%)",
           backgroundSize: "20px 20px",
         }}
       />
@@ -106,7 +127,9 @@ export default function PreviewArea() {
 
       {/* Image info badge */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm border border-stone-200 rounded-full px-3 py-1 text-[10px] text-stone-500 flex items-center gap-2 shadow-sm">
-        <span>{image.width} × {image.height}px</span>
+        <span>
+          {image.width} × {image.height}px
+        </span>
         <span className="w-px h-3 bg-stone-200" />
         <span>{image.type.split("/")[1].toUpperCase()}</span>
         <span className="w-px h-3 bg-stone-200" />

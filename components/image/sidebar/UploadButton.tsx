@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { useEditor } from "@/lib/editor-context";
+import { useEditor } from "@/lib/image/editor-context";
 
 export default function UploadButton() {
   const { loadImage, image, clearImage } = useEditor();
@@ -29,9 +29,12 @@ export default function UploadButton() {
               style={{ backgroundImage: `url(${image.url})` }}
             />
             <div className="min-w-0">
-              <p className="text-xs font-medium text-stone-700 truncate">{image.name}</p>
+              <p className="text-xs font-medium text-stone-700 truncate">
+                {image.name}
+              </p>
               <p className="text-[10px] text-stone-400">
-                {image.width} × {image.height}px · {(image.size / 1024).toFixed(0)} KB
+                {image.width} × {image.height}px ·{" "}
+                {(image.size / 1024).toFixed(0)} KB
               </p>
             </div>
           </div>
@@ -62,8 +65,12 @@ export default function UploadButton() {
         className="w-full rounded-lg border-2 border-dashed border-indigo-200 bg-indigo-50/50 hover:bg-indigo-50 hover:border-indigo-300 transition-colors py-4 px-3 flex flex-col items-center gap-1.5 group"
       >
         <span className="text-xl">🖼️</span>
-        <span className="text-xs font-medium text-indigo-600">Upload Image</span>
-        <span className="text-[10px] text-stone-400">PNG, JPG, WebP up to 20MB</span>
+        <span className="text-xs font-medium text-indigo-600">
+          Upload Image
+        </span>
+        <span className="text-[10px] text-stone-400">
+          PNG, JPG, WebP up to 20MB
+        </span>
       </button>
     </div>
   );

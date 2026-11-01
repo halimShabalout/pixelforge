@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "PixelForge — Image Editor",
-  description: "Resize, compress, crop, convert and edit images directly in your browser.",
+  title: "PixelForge — Image, Video, PDF & File Tools",
+  description:
+    "Edit images, create videos, manage PDFs, and convert files directly in your browser. No uploads, no account required.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

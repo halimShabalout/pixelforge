@@ -1,23 +1,27 @@
 "use client";
 
-import { useEditor } from "@/lib/editor-context";
-import { TOOLS } from "@/lib/tools";
-import ResizePanel, { getResizeValues } from "@/components/tools/ResizePanel";
+import { useEditor } from "@/lib/image/editor-context";
+import { TOOLS } from "@/lib/image/tools";
+import ResizePanel, {
+  getResizeValues,
+} from "@/components/image/tools/ResizePanel";
 import CompressPanel, {
   getCompressValues,
-} from "@/components/tools/CompressPanel";
-import CropPanel, { getCropValues } from "@/components/tools/CropPanel";
-import RotatePanel, { getRotateValues } from "@/components/tools/RotatePanel";
-import FlipPanel, { getFlipValues } from "@/components/tools/FlipPanel";
+} from "@/components/image/tools/CompressPanel";
+import CropPanel, { getCropValues } from "@/components/image/tools/CropPanel";
+import RotatePanel, {
+  getRotateValues,
+} from "@/components/image/tools/RotatePanel";
+import FlipPanel, { getFlipValues } from "@/components/image/tools/FlipPanel";
 import ConvertPanel, {
   getConvertValues,
-} from "@/components/tools/ConvertPanel";
+} from "@/components/image/tools/ConvertPanel";
 import BrightnessPanel, {
   getAdjustValues,
-} from "@/components/tools/BrightnessPanel";
+} from "@/components/image/tools/BrightnessPanel";
 import GrayscalePanel, {
   getGrayscaleValues,
-} from "@/components/tools/GrayscalePanel";
+} from "@/components/image/tools/GrayscalePanel";
 
 const PANELS: Record<string, React.ReactNode> = {
   resize: <ResizePanel />,

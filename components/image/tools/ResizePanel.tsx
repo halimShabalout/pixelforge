@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useEditor } from "@/lib/editor-context";
+import { useEditor } from "@/lib/image/editor-context";
 
 // Expose current resize values so SubSidebar can call applyResize
 // We use a module-level ref so SubSidebar can read without prop drilling
@@ -85,15 +85,20 @@ export default function ResizePanel() {
                   setWidth(Math.round((width / image.width) * 100));
                   setHeight(Math.round((height / image.height) * 100));
                 } else if (u === "px" && unit === "%" && image) {
-                  setWidth(Math.max(1, Math.round((width / 100) * image.width)));
-                  setHeight(Math.max(1, Math.round((height / 100) * image.height)));
+                  setWidth(
+                    Math.max(1, Math.round((width / 100) * image.width)),
+                  );
+                  setHeight(
+                    Math.max(1, Math.round((height / 100) * image.height)),
+                  );
                 }
                 setUnit(u);
               }}
-              className={`flex-1 py-1.5 text-xs font-medium transition-colors ${unit === u
-                ? "bg-indigo-600 text-white"
-                : "text-stone-500 hover:bg-stone-50"
-                }`}
+              className={`flex-1 py-1.5 text-xs font-medium transition-colors ${
+                unit === u
+                  ? "bg-indigo-600 text-white"
+                  : "text-stone-500 hover:bg-stone-50"
+              }`}
             >
               {u}
             </button>
@@ -117,17 +122,21 @@ export default function ResizePanel() {
         <div className="flex justify-center">
           <button
             onClick={() => setLinked(!linked)}
-            className={`text-xs px-3 py-1 rounded-md border transition-colors ${linked
-              ? "border-indigo-200 text-indigo-600 bg-indigo-50"
-              : "border-stone-200 text-stone-400 hover:text-stone-600"
-              }`}
+            className={`text-xs px-3 py-1 rounded-md border transition-colors ${
+              linked
+                ? "border-indigo-200 text-indigo-600 bg-indigo-50"
+                : "border-stone-200 text-stone-400 hover:text-stone-600"
+            }`}
           >
             {linked ? "🔗 Linked" : "🔓 Unlinked"}
           </button>
         </div>
         <div>
           <label className="text-xs text-stone-500 block mb-1">
-            Height {unit === "%" && image && <span className="text-stone-300">({previewH}px)</span>}
+            Height{" "}
+            {unit === "%" && image && (
+              <span className="text-stone-300">({previewH}px)</span>
+            )}
           </label>
           <input
             type="number"

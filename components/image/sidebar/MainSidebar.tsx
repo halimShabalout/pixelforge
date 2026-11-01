@@ -1,7 +1,7 @@
 "use client";
 
-import { TOOLS } from "@/lib/tools";
-import { useEditor } from "@/lib/editor-context";
+import { TOOLS } from "@/lib/image/tools";
+import { useEditor } from "@/lib/image/editor-context";
 import UploadButton from "./UploadButton";
 
 interface MainSidebarProps {
@@ -39,14 +39,17 @@ export default function MainSidebar({ isOpen, onClose }: MainSidebarProps) {
                   onClose();
                 }}
                 className={`w-full flex items-center gap-3 px-2.5 py-2 rounded-lg text-left transition-all text-sm
-                  ${isDisabled
-                    ? "opacity-40 cursor-not-allowed text-stone-400"
-                    : isActive
-                    ? "bg-indigo-50 text-indigo-700 font-medium"
-                    : "text-stone-600 hover:bg-stone-50 hover:text-stone-800"
+                  ${
+                    isDisabled
+                      ? "opacity-40 cursor-not-allowed text-stone-400"
+                      : isActive
+                        ? "bg-indigo-50 text-indigo-700 font-medium"
+                        : "text-stone-600 hover:bg-stone-50 hover:text-stone-800"
                   }`}
               >
-                <span className={`text-base w-5 text-center shrink-0 ${isActive ? "text-indigo-500" : ""}`}>
+                <span
+                  className={`text-base w-5 text-center shrink-0 ${isActive ? "text-indigo-500" : ""}`}
+                >
                   {tool.icon}
                 </span>
                 <span className="truncate">{tool.label}</span>
@@ -61,16 +64,16 @@ export default function MainSidebar({ isOpen, onClose }: MainSidebarProps) {
   return (
     <>
       {/* Desktop: always visible */}
-      <div className="hidden md:flex h-full">
-        {content}
-      </div>
+      <div className="hidden md:flex h-full">{content}</div>
 
       {/* Mobile: slide-in drawer */}
       <>
         {/* Backdrop */}
         <div
           className={`md:hidden fixed inset-0 bg-black/30 z-20 backdrop-blur-[1px] transition-opacity duration-200 ${
-            isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+            isOpen
+              ? "opacity-100 pointer-events-auto"
+              : "opacity-0 pointer-events-none"
           }`}
           onClick={onClose}
         />

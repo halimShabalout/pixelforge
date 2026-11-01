@@ -1,8 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback } from "react";
-import { EditorState, ImageFile, ToolId } from "@/types";
-import { ACCEPTED_FORMATS, MAX_FILE_SIZE } from "@/lib/tools";
+import { EditorState, ImageFile, ToolId } from "@/types/image";
+import { ACCEPTED_FORMATS, MAX_FILE_SIZE } from "@/lib/image/tools";
 
 interface EditorContextValue extends EditorState {
   setActiveTool: (tool: ToolId | null) => void;
@@ -650,7 +650,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         applyFlip,
         applyConvert,
         applyAdjust,
-        applyGrayscale
+        applyGrayscale,
       }}
     >
       {children}

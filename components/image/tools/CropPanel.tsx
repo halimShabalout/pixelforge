@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useEditor } from "@/lib/editor-context";
+import { useEditor } from "@/lib/image/editor-context";
 
 const PRESETS = [
   { label: "Free", ratio: null },
@@ -11,8 +11,16 @@ const PRESETS = [
   { label: "3:2", ratio: 3 / 2 },
 ];
 
-export let getCropValues: () => { x: number; y: number; width: number; height: number } = () => ({
-  x: 0, y: 0, width: 100, height: 100,
+export let getCropValues: () => {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+} = () => ({
+  x: 0,
+  y: 0,
+  width: 100,
+  height: 100,
 });
 
 export default function CropPanel() {
@@ -40,7 +48,7 @@ export default function CropPanel() {
   }, [x, y, width, height]);
 
   // Apply preset ratio
-  const handlePreset = (p: typeof PRESETS[number]) => {
+  const handlePreset = (p: (typeof PRESETS)[number]) => {
     setPreset(p.label);
     if (!p.ratio || !image) return;
     const newWidth = image.width;

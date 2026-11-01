@@ -1,5 +1,5 @@
 import EditorShell from "./EditorShell";
 
-export default function EditorPage() {
+export default function ImagePage() {
   return <EditorShell />;
 }
